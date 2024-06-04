@@ -1,0 +1,439 @@
+---
+title: 'What factors drive resident-healthcare worker networks in long-term healthcare facilities?'
+subtitle: "An Application of Multilevel Exponential-Family Random Graph Models with Bi-partite Networks"
+author: 
+  - name: George G. Vega Yon
+    affiliation:
+      - Division of Epidemiology
+      - The University of Utah
+    email: george.vegayon@utah.edu
+format: revealjs 
+fontsize: 20pt
+footer: What drives resident-healthcare worker networks? -- <https://ggv.cl/slides/mind2024>
+date: 2024-06-04
+embed-resources: true
+bibliography: references.bib
+slide-number: c
+html-math-method: katex
+---
+
+## Acknowledgements
+
+::: {.columns}
+
+::: {.column}
+This is joint work with:
+
+- Chong Zhang
+- Karim Khade
+- Nelson Chang
+- Lindsay Visnovsky
+- Alun Thomas
+- Candace Haroldsen
+- Kristina Stratford
+- Matthew H. Samore
+
+:::
+::: {.column}
+CDC Prevention Epicenter and MInD Programs support this work.
+:::
+::: 
+
+
+# Preliminaries {background-color="black"}
+
+## Background
+
+- Over a thousand long-term care facilities \[LTCFs] reached infection rates of 75% or more (year 1 of COVID-19) [@MoreThousandNursing].
+
+- On average, over 1.7 million patients in the US acquired a Healthcare Associated Infection [HAI]. [@haqueHealthCareassociatedInfections2018].
+
+- The estimated cost of HAI in the US for 2016 is between 7.2 and 14.9 billion USD. [@forresterCostHealthCare2022].
+
+- The spread of pathogens within healthcare facilities is boosted mainly through contact with and movement of healthcare workers [HCW].
+
+- Little is known about the structure of healthcare worker networks and how they relate to patient characteristics.
+
+
+## Networks in Healthcare
+
+
+- Most published work focuses on high-level summaries: overall contact rate, duration of contacts, and network-based measures like transitivity. 
+
+- Analysis of the topology of the contact networks, especially as they relate to resident and HCP factors, has been limited.
+
+- Most network studies focus on physicians, a handful incorporate other healthcare professionals, and most use projected networks, focusing only on physician-physician networks [@dugoffScopingReviewPatientsharing2018].
+
+- @moenAnalysisPatientsharingPhysician2016 provides a large-scale analysis of patient-physician networks:
+
+  - Use Exponential-Family Random Graph Models \[ERGMs] to assess assortativity between different types of healthcare professionals within two hospitals.
+  - Used the physician-projected networks (a uni-partite version featuring physicians with ties representing shared patients)
+  - This approach **discards any signal encoded in bipartite structures**.
+
+For other studies, see @champredonIndividualMovementsContact2018, @duvalMeasuringDynamicSocial2018, @vilchesMultifacetedStrategiesControl2021, and @schneiderEpidemicManagementControl2022.
+
+## Data: Overview
+
+
+::: {.columns}
+::: {.column width="60%"}
+- The data were collected through the [**CDC Epicenter program**](https://www.cdc.gov/healthcare-associated-infections/php/prevention-epicenters/index.html){target="_blank"} in collaboration with CDC Emerging Infections Program (EIP) sites in **seven states** (CA, GA, MD, MN, NY, TN).
+
+- Twenty-five LTCFs were enrolled in the study.
+
+- Data collection occurred in two units: One long-term care unit and one higher acuity care unit at each LTCF over two days.
+
+- The data used in this study come from **interviews conducted at each enrolled facility** on each day of data collection.
+
+- Key to this study: **using information about HCW-resident interactions to build bipartite networks.**
+:::
+::: {.column width="40%"}
+![Image generated using Bing's AI designer using the prompt: "generate a realistic image of a health care provider giving care to a long-term healthcare facility patient."](fig/bing-lthf.png)
+:::
+:::
+
+
+## Descriptive stats: Resident and Nursing Home Demographics
+
+::: {style="font-size: 60%"}
+
+| Unit Type        | # of Units | # of Residents | Mean Length of Stay (Days) | Mean Age (Years) | Diabetes       | In-dwelling Devices | Receiving Antibiotics (Systemic) | Receiving Antibiotics (Topical) | MDRO at Time of Visit |
+|:------------------|:------------:|:----------------:|:----------------------------:|:------------------:|:----------------:|:---------------------:|:---------------------------------:|:---------------------------------:|:-----------------------:|
+| Mixed            | 17         | 279            | 985                        | 77               | 100<br>(35.8%)    | 49<br>(17.6%)          | 16<br>(5.7%)                       | 1<br>(0.4%)                        | 6<br>(2.2%)              |
+| Long-Term Care   | 8          | 1161           | 1060                       | 77               | 381<br>(32.8%)    | 154<br>(13.3%)         | 63<br>(5.4%)                       | 36<br>(3.1%)                       | 50<br>(4.3%)             |
+| Skilled Nursing  | 11         | 688            | 327                        | 74               | 340<br>(49.4%)    | 145<br>(21.1%)         | 108<br>(15.7%)                     | 64<br>(9.3%)                       | 30<br>(4.4%)             |
+| Ventilator       | 4          | 269            | 867                        | 60               | 124<br>(46.1%)    | 269<br>(100.0%)        | 48<br>(17.8%)                      | 16<br>(5.9%)                       | 73<br>(27.1%)            |
+| Other            | 7          | 122            | 434                        | 79               | 98<br>(80.3%)     | 25<br>(20.5%)          | 23<br>(18.9%)                      | 48<br>(39.3%)                      | 4<br>(3.3%)              |
+
+:::
+
+NH: Nursing home, MDRO: Multi-Drug Resistant Organisms
+
+
+## Descriptive stats: Intercept Interview Results
+
++----------------------+-----------------+------------+----------------+
+|                      | **Interview**   |            |                |
++----------------------+-----------------+------------+----------------+
+| **HCP Type**         | **Resident**    |**Tasks**   | **Tasks**       |
+|                      | **Interactions**|**per hour**| **per resident**|
+|                      | **per hour**    |            | **per hour**    |
+|                      | [^meaninter]    |            |                 |
+|                      |                 |            |                 |
++----------------------+-----------------+------------+----------------+
+| CAN                  | 2.7             | 6.2        | **2.3**        |
++----------------------+-----------------+------------+----------------+
+| Nurse                | 3.4             | 5.0        | **1.5**        |
++----------------------+-----------------+------------+----------------+
+| Other                | 2.5             | 4.5        | **1.8**        |
++----------------------+-----------------+------------+----------------+
+| Physician/PA/NP      | 1.0             | 0.9        | **0.9**        |
++----------------------+-----------------+------------+----------------+
+| PT/OT                | 1.3             | 1.9        | **1.5**        |
++----------------------+-----------------+------------+----------------+
+| Resp. Therapy        | 3.4             | 5.4        | **1.6**        |
++----------------------+-----------------+------------+----------------+
+
+[^meaninter]: Mean number of Resident interactions by a specific HCP per hour
+
+
+
+## Data
+
+![Figure 1 from @nelsonchangAssessingPathogenTransmission2023: Distribution of resident care types by health care provider types](fig/chang-et-al.png){width="80%"}
+
+Key for this study: **using information about HCW-resident interactions to build bipartite networks.**
+
+
+## Bipartite Networks
+
+::: {style="font-size:80%"}
+- In bipartite networks, nodes are divided into two sets, and edges connect only nodes from different sets.
+
+- Ties represent an interaction between a resident and a healthcare worker.
+:::
+
+::: {.columns}
+::: {.column width="40%"}
+![Example of a resident-health careworker network. The figure shows the bipartite network with residents colored green and healthcare workers colored blue.](fig/net4_curved.png){#fig-eggraph}
+:::
+::: {.column width="40%"}
+![The figure shows all 99 networks. Like in Figure @fig-eggraph, healthcare workers are colored blue, while residents are colored green](fig/nursing_home.png){#fig-allnets}
+:::
+:::
+
+# Methods {background-color="black"}
+
+## ERGMs
+
+\newcommand{\sufstats}[1]{\bm{g}\left(#1\right)}
+\renewcommand{\exp}[1]{\text{exp}\left\{#1\right\}}
+\renewcommand{\log}[1]{\text{log}\left\{#1\right\}}
+\newcommand{\transpose}[1]{{#1}^{\bm{t}}} 
+\renewcommand{\t}[1]{\transpose{#1}}
+
+\newcommand{\s}[1]{\sufstats{#1}}
+\newcommand{\SUFF}{\bm{S}}
+\newcommand{\Suff}{\bm{G}}
+\newcommand{\suff}{\bm{g}}
+
+\newcommand{\coef}{\bm{\theta}}
+\newcommand{\weight}{\bm{w}}
+\newcommand{\Weight}{\bm{W}}
+
+\newcommand{\Graph}{\bm{Y}}
+\newcommand{\graph}{\bm{y}}
+\newcommand{\g}{\graph}
+\newcommand{\GRAPH}{\mathcal{Y}}
+\newcommand{\Adjmat}{A}
+\newcommand{\adjmat}{a}
+\newcommand{\ADJMAT}{\bm{A}}
+
+\newcommand{\INDEPVAR}{\bm{X}}
+\newcommand{\Indepvar}{X}
+\newcommand{\indepvar}{x}
+
+\newcommand{\normconst}{\kappa_{\GRAPH}\left(\coef\right)}
+
+
+\def\ergmito{ERGM\textit{ito}}
+\def\ergmitos{\ergmito{}\textit{s}}
+\newcommand{\isone}[1]{{\boldsymbol{1}\left( #1 \right)}}
+\newcommand{\f}[1]{{f\left(#1\right) }}
+
+\newcommand{\params}{\bm{\theta}}
+
+\renewcommand{\Pr}[1]{{\text{Pr}_{\GRAPH,\coef}\left(#1\right) }}
+\newcommand{\Prcond}[2]{%
+  {\text{Pr}_{\GRAPH,\coef}\left(#1\left|\;#2\right.\right)}%
+  }
+\newcommand{\fcond}[2]{{f\left(#1|#2\right) }}
+\newcommand{\Expected}[1]{{\mathbb{E}\left\{#1\right\}}}
+\newcommand{\ExpectedCond}[2]{{\mathbb{E}\left\{#1\vphantom{#2}\right|\left.\vphantom{#1}#2\right\}}}
+\renewcommand{\exp}[1]{\text{exp}\left\{#1\right\}}
+
+\newcommand{\Likelihood}[2]{\text{L}\left(#1 \left|\vphantom{#1}#2\right.\right)}
+
+\newcommand{\loglik}[1]{l\left(#1\right)}
+
+::: {style="font-size: 100%; background-color:gray; color:white; padding:10px; text-align: center"}
+What micro-level **processes/structures**<br>are we **more likely** to observe in **these networks**?
+:::
+
+::: {style="font-size:80%"}
+
+- Exponential-Family Random Graph Models \[ERGMs] are used to model social networks [@Robins2007; @Holland1981; @Frank1986; @Wasserman1996; @Snijders2006; and others].
+
+
+- An observed graph $\graph$ is characterized by a set of sufficient statistics $\sufstats{\graph}$ and parameters $\params$. In a model that also includes node characteristics $\Indepvar$, this leads to the following probability function:
+
+  $$
+  \Prcond{\Graph = \graph}{\Indepvar} = \frac{%
+    \exp{\transpose{\params}\sufstats{\graph, \Indepvar}}%	
+  }{
+    \kappa\left(\params, \Indepvar\right)
+  },\quad\forall \graph\in\GRAPH
+  $$ {#eq-ergm}
+
+  Where $\normconst{} = \sum_{\graph\in\GRAPH}\exp{\transpose{\theta}\sufstats{\graph, \Indepvar}}$ is the normalizing constant, and $\GRAPH$ is the support of the model that is usually assumed to include all graphs of the same type (e.g., directed or undirected) and size, that do not include self-ties.
+
+<!-- - In the directed graph case, the size of $\GRAPH$ equals $2^{n(n-1)}$ possible graphs. Making the exact calculation of $\normconst{}$, and therefore of \eqref{eq:ergm},  computationally expensive.
+
+- A sophisticated array of parameters can be specified for ERGMs that reflect social and structural processes of interest to social scientists, such as social closure, connectivity, and other affiliation preferences.
+
+- Although estimation of ERGMs is challenging, to this day, robust model fitting strategies are now widely available through community-developed software like the **statnet** collection of R packages [@statnet] and the **PNet** software [@wang2009pnet]. -->
+
+- We use **statnet**'s' **ergm.multi** R package [@statnet;@krivitskyTaleTwoDatasets2023] to study the prevalence of various network structures associated with patient cohorting based on patients' characteristics
+
+- We present one of the first applications of pooled bipartite ERGMs.
+
+:::
+
+## ERGM terms
+
+We can use ERGMs to question various network structures. Here are some of the terms we tested in our models:
+
+::: {.columns style="font-size: 70%;"}
+::: {.column width="50%"}
+| Name | Representation |
+|------|---------------:|
+| Edge count<br>$\sum_{i<j}y_{ij}$ | ![](fig/term-edgecount.png){width="20%"} |
+| HCW-centered two-star $\sum_{i\in H, \{j<k\}\in R}y_{ij}y_{ik}$ | ![](fig/term-actor-twostar.png){width="20%"} |
+| Resident-centered two-star $\sum_{i\in R, \{j<k\}\in H}y_{ji}y_{ki}$ | ![](fig/term-entity-twostar.png){width="20%"} |
+| HCW-centered homophilic two-star $\sum_{i\in H, \{j<k\}\in R}\mathbf{1}\left(x_{j} = x_k\right) y_{ij}y_{ik}$ | ![](fig/term-actor-twostar-mix.png){width="20%"} |
+:::
+::: {.column width="50%"}
+| Name | Representation |
+|------|---------------:|
+| Res.-centered homophilic two-star $\sum_{i\in R, \{j<k\}\in H}\mathbf{1}\left(x_{j} = x_k\right)y_{ji}y_{ki}$ | ![](fig/term-entity-twostar-mix.png){width="20%"} |
+| Dyad-wise one shared residents[^notediad] $\sum_{\{i<j\}\in H, k\in R}y_{ik}y_{jk}$ | ![](fig/term-actor-one-edgewise-shared-partner.png){width="20%"} |
+| Dyad-wise two shared residents$^1$ $\sum_{\{i<j\}\in H, \{k<h\}\in R}y_{ik}y_{jk}y_{ih}y_{jh}$ | ![](fig/term-actor-two-edgewise-shared-partner.png){width="20%"} |
+:::
+:::
+
+[^notediad]: <text style="font-size: 150%">In the case of the shared-partners terms, we use the geometrically weighted dyad-wise shared-partners [GWDSP] version for model fitting.</text>
+
+## ERGM Descriptive statistics 
+
+::: {.columns}
+::: {.column style="font-size:60%"}
+
+|                                 | Total count | Average count |
+|---------------------------------|------------:|--------------:|
+| **Structural terms**            |             |               |
+| Edges                         | 7800  | 83.87   |
+| log(n) $\times$ edges                    | 65005 | 698.98  |
+| GWDSP[^gwdsp] (decay fixed 0.75)            | 3383  | 36.38   |
+| **Nodal effects** | | |
+| Resident under wound care (yes/no)       | 1752  | 18.84   |
+| Resident is bedridden (yes/no)        | 899   | 9.67    |
+| **Resident mixing (HCW centered)** |             |               |
+| None with ventilator             | 45971 | 494.31  |
+| Both with ventilator            | 1256  | 13.51   |
+| None with diabetes               | 20278 | 218.04  |
+| Both with diabetes              | 7444  | 80.04   |
+| **HCW mixing (resident centered)** |             |               |
+| None nurse                     | 3161  | 33.99   |
+| Both nurse                     | 366   | 3.94    |
+| None therapist                    | 6187  | 66.53   |
+| Both therapist                    | 68    | 0.73    |
+
+: Observed statistics for the 93 networks used in the analysis {#tbl-observedstats}
+
+:::
+::: {.column}
+![Distribution of edge counts across the 93 used networks.](fig/summary-stats-distribution.png){#fig-edgecounts width="80%"}
+:::
+:::
+
+[^gwdsp]: Geometrically-weighted dyad-wise shared partners.
+
+
+
+# Results {background-color="black"}
+
+## Fitting multilevel ERGMs to Bipartite Networks
+
+We encountered two issues worth highlighting.
+
+1. Network-size heterogeneity plays a vital role in convergence.
+
+    The presence of a relatively large network negatively impacted convergence. As a response, we followed a two-step approach:
+
+    1. Fit the model without the outlier graph.
+    2. Use the estimates of that fit as a starting point for re-estimating the model, including the outlier network.
+
+    The inclusion/exclusion of the outlier did not significantly affect the parameter estimates.
+
+1. Even in pooled models where network size heterogeneity could help, we experienced high collinearity between two-stars, concurrency, and geometrically weighted dyad-wise shared partners.[^seemore]
+
+[^seemore]: For more on multicolinearity in ERGMs, see @vegayonPowerMulticollinearitySmall2023a, @krivitskyRejoinderDiscussionTale2023, and @duxburyDiagnosingMulticollinearityExponential2021.
+  
+  Our strategy was to fit separate models featuring each of these terms and keep the one that resulted in the smallest AIC/BIC.
+
+## Model fit
+
+::: {.columns}
+::: {.column width="50%"}
+- The GWDSP effect is significantly negative, indicating a low chance of HCW overlapping residents.
+
+- Residents under wound care/bedridden have more HCWs associated with them than other patients. 
+
+- Resident-homophily: Residents share HCWs with others with the same care needs.
+
+- Residents under ventilator care cluster around the same HCW.
+
+- Observing two or more of the same type of HCW serving the same resident is less likely than expected by chance.
+
+- No cohorting effect was observed among MDRO patients.
+:::
+::: {.column style="font-size:55%"}
+
+| Term                                      | Estimate                     |
+|-------------------------------------------|-----------------------------:|
+| **Structural terms**                      |                              |
+| edges                                     | $3.58 \; (0.14)^{***}$       |
+| log(n) $\times$ edges                     | $-1.11 \; (0.04)^{***}$      |
+| GWDSP (HCW centered) (decay = 0.75)        | $-1.02 \; (0.04)^{***}$      |
+| **Nodal effects**                         |                              |
+| Resident under wound care (yes/no)        | $0.16 \; (0.04)^{***}$       |
+| Resident is bedridden (yes/no)            | $0.20 \; (0.05)^{***}$       |
+| **HCW centered 2-star mix**                |                              |
+| None with ventilator                      | $0.01 \; (<0.01)^{***}$       |
+| Both with ventilator                      | $0.02 \; (0.01)^{*\hphantom{**}}$ |
+| None with diabetes                        | $0.04 \; (<0.01)^{***}$       |
+| Both with diabetes                        | $0.05 \; (0.01)^{***}$       |
+| **Resident centered 2-star mix**           |                              |
+| None nurse                                | $-0.11 \; (0.02)^{***}$      |
+| Both nurse                                | $-0.37 \; (0.05)^{***}$      |
+| None therapist                            | $0.11 \; (0.01)^{***}$       |
+| Both therapists                           | $-0.25 \; (0.10)^{*\hphantom{**}}$ |
+| AIC                                       | $31,167.55$                  |
+| BIC                                       | $31,275.30$                  |
+| Log Likelihood                            | $-15,570.78$                 |
+
+: Multilevel bi-partite ERGM fit with 93 networks. {#tbl-ergmfit}
+:::
+:::
+
+## Discussion
+
+::: {style="font-size: 80%"}
+
+- Most network applications in healthcare focus on **uni-partite networks** (projections), *e.g.*, physician-physician networks.
+
+- Leveraging recent advances in multi-network inference, we present **one of the first applications of pooled bipartite ERGMs**.
+
+- We found that
+    1. Residents under wound care/bedridden have more HCWs associated with them than other patients.
+    1. Residents share HCWs with others with the same care needs (ventilator and wound care).
+    1. HCW assortativity (*e.g.*, two nurses for the same resident) is less likely than expected by chance.
+    1. We found no evidence of cohorting among MDRO patients.
+
+- Although cohorting is a common practice[^egdiseases], **measuring its effectiveness is challenging**, especially in endemic situations[@abadSystematicReviewEffectiveness2020].
+
+[^egdiseases]: Generally, both patients and healthcare workers are isolated in the presence of infectious diseases, including Multiple Drug Resistance Organisms [MDROs] like Methicillin-resistant Staphylococcus aureus [MRSA] Clostridioides difficile [C. diff] or vancomycin-resistant Enterococcus. 
+
+- We can leverage information about network structure to design other studies, *e.g.*, agent-based models.
+
+- Future work will focus on the **dynamics of these networks** (using temporal ERGMs) and how they relate to **pathogen transmission**.
+
+:::
+
+
+# Appendix {background-color="black"}
+
+## Data: Interviews
+
+- HCPs working in the study unit were asked about their resident interactions between consecutive interviews about once every 60 to 90 minutes.
+
+- They were assigned a non-identifiable study ID that was used throughout the shift to permit the linkage of multiple interviews from the same HCP.
+
+- New IDs were given to all HCPs involved in the second round of interviews, making it implausible to associate first and second-round interviews.
+
+## Data: Resident Data {.smaller}
+
+- We collected standard patient demographics such as age, sex, race, and ethnicity. 
+
+- We performed chart reviews for all residents in the two study units during the Epicenter data collection visits.
+
+- The data abstracted included:
+
+    - Whether the patient was admitted for a short stay,
+    - Had diabetes,
+    - Was receiving dialysis,
+    - Was bedridden, 
+    - Had urinary or central line catheters,
+    - Had percutaneous gastrostomy/jejunostomy tube,
+    - Was on a ventilator, 
+    - Had pressure ulcers, or
+    - Was receiving wound care.
+
+- We also collected data on the presence of infections and any treatments prescribed for possible infections.
+
+- More information about the data collection process can be found in @nelsonchangAssessingPathogenTransmission2023.
+
+- Using the interview data, we built bipartite networks connecting HCW with residents.
+
+## References
+
