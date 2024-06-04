@@ -9,7 +9,7 @@ author:
     email: george.vegayon@utah.edu
 format: revealjs 
 fontsize: 20pt
-footer: What drives resident-healthcare worker networks? -- <https://ggv.cl/slides/mind2024>
+footer: What drives resident-healthcare worker networks? -- <https://ggv.cl/slides/mind-june2024>
 date: 2024-06-04
 embed-resources: true
 bibliography: references.bib
